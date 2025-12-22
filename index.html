@@ -1,94 +1,162 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>حساب سعر الذهب</title>
+    <meta charset="UTF-8">
+    <title>حاسبة أسعار الذهب</title>
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f4f4;
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+        }
 
-.box {
-    background: white;
-    width: 420px;
-    padding: 25px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 0 12px rgba(0,0,0,0.15);
-}
+        .page {
+            display: flex;
+            min-height: 100vh;
+        }
 
-h1 {
-    margin-bottom: 15px;
-}
+        /* مساحة يسار فارغة للاستخدام لاحقًا */
+        .left-space {
+            width: 25%;
+        }
 
-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 18px;
-    margin-bottom: 15px;
-    text-align: center;
-}
+        /* المحتوى الرئيسي */
+        .container {
+            width: 75%;
+            padding: 40px;
+        }
 
-.price {
-    font-size: 20px;
-    margin: 8px 0;
-}
-</style>
+        .card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            max-width: 800px;
+            margin-right: auto;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin: 20px 0 8px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        input {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #0078d4;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #005fa3;
+        }
+
+        .results {
+            margin-top: 25px;
+            font-size: 16px;
+            line-height: 1.9;
+            color: #222;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding: 12px 10px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            background-color: #fafafa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 900px) {
+            .page {
+                flex-direction: column;
+            }
+
+            .left-space {
+                display: none;
+            }
+
+            .container {
+                width: 100%;
+            }
+
+            .card {
+                margin: auto;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="box">
-    <h1>حساب سعر الذهب</h1>
+<div class="page">
+    <div class="left-space"></div>
 
-    <input
-        type="number"
-        id="ounceInput"
-        placeholder="أدخل سعر أونصة الذهب بالدولار"
-        oninput="calculateGold()"
-    >
+    <div class="container">
+        <div class="card">
+            <h1>حاسبة أسعار الذهب</h1>
 
-    <div class="price" id="g24">غرام عيار 24: -</div>
-    <div class="price" id="g22">غرام عيار 22: -</div>
-    <div class="price" id="g21">غرام عيار 21: -</div>
-    <div class="price" id="g18">غرام عيار 18: -</div>
+            <label>سعر أونصة الذهب (بالدولار):</label>
+            <input type="number" id="ouncePrice" placeholder="مثال: 2350">
+
+            <br>
+            <button onclick="calculate()">احسب الأسعار</button>
+
+            <div class="results" id="results"></div>
+        </div>
+
+        <footer>
+            © 2025 | برمجة فؤاد أبو الحارث
+        </footer>
+    </div>
 </div>
 
 <script>
-function calculateGold() {
-    const ouncePrice = parseFloat(
-        document.getElementById("ounceInput").value
-    );
+    function calculate() {
+        const ounce = parseFloat(document.getElementById("ouncePrice").value);
+        const results = document.getElementById("results");
 
-    if (!ouncePrice || ouncePrice <= 0) {
-        document.getElementById("g24").textContent = "غرام عيار 24: -";
-        document.getElementById("g22").textContent = "غرام عيار 22: -";
-        document.getElementById("g21").textContent = "غرام عيار 21: -";
-        document.getElementById("g18").textContent = "غرام عيار 18: -";
-        return;
+        if (isNaN(ounce) || ounce <= 0) {
+            results.innerHTML = "⚠️ الرجاء إدخال سعر صحيح للأونصة.";
+            return;
+        }
+
+        const gram24 = ounce / 31.1035;
+        const gram22 = gram24 * 0.916;
+        const gram21 = gram24 * 0.875;
+        const gram18 = gram24 * 0.75;
+
+        results.innerHTML = `
+            <strong>سعر الغرام:</strong><br>
+            عيار 24: ${gram24.toFixed(2)} $<br>
+            عيار 22: ${gram22.toFixed(2)} $<br>
+            عيار 21: ${gram21.toFixed(2)} $<br>
+            عيار 18: ${gram18.toFixed(2)} $
+        `;
     }
-
-    const gram = ouncePrice / 31.1035;
-
-    document.getElementById("g24").textContent =
-        `غرام عيار 24: ${gram.toFixed(2)} $`;
-
-    document.getElementById("g22").textContent =
-        `غرام عيار 22: ${(gram * 0.916).toFixed(2)} $`;
-
-    document.getElementById("g21").textContent =
-        `غرام عيار 21: ${(gram * 0.875).toFixed(2)} $`;
-
-    document.getElementById("g18").textContent =
-        `غرام عيار 18: ${(gram * 0.75).toFixed(2)} $`;
-}
 </script>
 
 </body>
