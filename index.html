@@ -2,161 +2,135 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>حاسبة أسعار الذهب</title>
+    <title>سعر الذهب</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         body {
-            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-            background-color: #f4f6f8;
             margin: 0;
-            padding: 0;
-            direction: rtl;
-        }
-
-        .page {
+            font-family: Arial, sans-serif;
+            background: #f3f3f3;
             display: flex;
-            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
-        /* مساحة يسار فارغة للاستخدام لاحقًا */
-        .left-space {
-            width: 25%;
+        .box {
+            width: 95%;
+            max-width: 360px;
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
-        /* المحتوى الرئيسي */
-        .container {
-            width: 75%;
-            padding: 40px;
+        img {
+            width: 90px;
+            margin-bottom: 10px;
         }
 
-        .card {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            max-width: 800px;
-            margin-right: auto;
+        h2 {
+            margin: 10px 0;
         }
 
-        h1 {
-            margin-top: 0;
-            color: #333;
-        }
-
-        label {
-            display: block;
-            margin: 20px 0 8px;
+        .price {
+            font-size: 24px;
             font-weight: bold;
-            color: #444;
+            color: #d4af37;
+            margin-bottom: 10px;
         }
 
-        input {
-            width: 300px;
-            padding: 10px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .grams td {
+            padding: 6px;
             font-size: 16px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+            text-align: right;
         }
 
-        button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background-color: #0078d4;
-            color: white;
+        tr:nth-child(even) {
+            background: #f8f8f8;
         }
 
-        button:hover {
-            background-color: #005fa3;
-        }
-
-        .results {
-            margin-top: 25px;
-            font-size: 16px;
-            line-height: 1.9;
-            color: #222;
+        .error {
+            color: red;
+            margin-top: 10px;
+            font-size: 14px;
         }
 
         footer {
-            margin-top: 40px;
-            padding: 12px 10px;
-            text-align: center;
-            font-size: 13px;
-            color: #666;
-            background-color: #fafafa;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        @media (max-width: 900px) {
-            .page {
-                flex-direction: column;
-            }
-
-            .left-space {
-                display: none;
-            }
-
-            .container {
-                width: 100%;
-            }
-
-            .card {
-                margin: auto;
-            }
+            margin-top: 15px;
+            font-size: 12px;
+            color: #777;
         }
     </style>
 </head>
-
 <body>
 
-<div class="page">
-    <div class="left-space"></div>
+<div class="box">
+    <img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" alt="gold">
 
-    <div class="container">
-        <div class="card">
-            <h1>حاسبة أسعار الذهب</h1>
+    <h2>سعر أونصة الذهب</h2>
+    <div class="price" id="ounce">-- USD</div>
 
-            <label>سعر أونصة الذهب (بالدولار):</label>
-            <input type="number" id="ouncePrice" placeholder="مثال: 2350">
+    <table dir="rtl" class="grams">
+        <tr><td>غرام 24</td><td id="g24">--</td></tr>
+        <tr><td>غرام 22</td><td id="g22">--</td></tr>
+        <tr><td>غرام 21</td><td id="g21">--</td></tr>
+        <tr><td>غرام 18</td><td id="g18">--</td></tr>
+    </table>
 
-            <br>
-            <button onclick="calculate()">احسب الأسعار</button>
-
-            <div class="results" id="results"></div>
-        </div>
-
-        <footer>
-            © 2025 | برمجة فؤاد أبو الحارث
-        </footer>
-    </div>
+    <div id="error" class="error"></div>
+    <footer>© 2025 | برمجة فؤاد أبو الحارث</footer>
 </div>
 
 <script>
-    function calculate() {
-        const ounce = parseFloat(document.getElementById("ouncePrice").value);
-        const results = document.getElementById("results");
+async function loadGoldPrice() {
+    try {
+        const response = await fetch("https://www.goldapi.io/api/XAU/USD", {
+            headers: {
+                "x-access-token": "goldapi-cvc4msmjinl6ew-io",
+                "Content-Type": "application/json"
+            }
+        });
 
-        if (isNaN(ounce) || ounce <= 0) {
-            results.innerHTML = "⚠️ الرجاء إدخال سعر صحيح للأونصة.";
-            return;
+        if (!response.ok) {
+            throw new Error("API Error");
         }
 
+        const data = await response.json();
+        const ounce = data.price;
         const gram24 = ounce / 31.1035;
-        const gram22 = gram24 * 0.916;
-        const gram21 = gram24 * 0.875;
-        const gram18 = gram24 * 0.75;
 
-        results.innerHTML = `
-            <strong>سعر الغرام:</strong><br>
-            عيار 24: ${gram24.toFixed(2)} $<br>
-            عيار 22: ${gram22.toFixed(2)} $<br>
-            عيار 21: ${gram21.toFixed(2)} $<br>
-            عيار 18: ${gram18.toFixed(2)} $
-        `;
+        document.getElementById("ounce").innerText =
+            ounce.toFixed(2) + " USD";
+
+        document.getElementById("g24").innerText =
+            gram24.toFixed(2) + " USD";
+
+        document.getElementById("g22").innerText =
+            (gram24 * 22 / 24).toFixed(2) + " USD";
+
+        document.getElementById("g21").innerText =
+            (gram24 * 21 / 24).toFixed(2) + " USD";
+
+        document.getElementById("g18").innerText =
+            (gram24 * 18 / 24).toFixed(2) + " USD";
+
+    } catch (err) {
+        document.getElementById("error").innerText =
+            "❌ تعذر جلب الأسعار حالياً";
+        console.error(err);
     }
+}
+
+loadGoldPrice();
 </script>
 
 </body>
