@@ -1,146 +1,168 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <title>سعر الذهب</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>سعر الذهب</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- منع الكاش -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f3f3f3;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .box {
-            width: 95%;
-            max-width: 360px;
-            background: white;
-            border-radius: 18px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-
-        img {
-            width: 90px;
-            margin-bottom: 10px;
-        }
-
-        h2 {
-            margin: 10px 0;
-        }
-
-        .price {
-            font-size: 24px;
-            font-weight: bold;
-            color: #d4af37;
-            margin-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .grams td {
-            padding: 6px;
-            font-size: 16px;
-            text-align: right;
-        }
-
-        tr:nth-child(even) {
-            background: #f8f8f8;
-        }
-
-        .error {
-            color: red;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        footer {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #888;
-            direction: rtl;
-        }
-    </style>
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f3f3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.box {
+    width: 95%;
+    max-width: 380px;
+    background: white;
+    border-radius: 18px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+img {
+    width: 90px;
+    margin-bottom: 10px;
+}
+.price {
+    font-size: 24px;
+    font-weight: bold;
+    color: #d4af37;
+}
+.manual {
+    color: #e67e22;
+    font-size: 13px;
+    margin-top: 4px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+.grams td {
+    padding: 6px;
+    text-align: right;
+}
+input, select, button {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+button {
+    background: #d4af37;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+button:hover {
+    background: #b8962e;
+}
+.error {
+    color: red;
+    margin-top: 8px;
+}
+footer {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #888;
+    direction: rtl;
+}
+</style>
 </head>
+
 <body>
 
 <div class="box">
-    <img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" alt="gold">
+<img src="https://cdn-icons-png.flaticon.com/512/138/138292.png">
 
-    <h2>سعر أونصة الذهب</h2>
-    <div class="price" id="ounce">-- USD</div>
+<h3>سعر أونصة الذهب</h3>
+<div class="price" id="ounce">--</div>
+<div class="manual" id="manualTag"></div>
 
-    <table dir="rtl" class="grams">
-        <tr><td>غرام 24</td><td id="g24">--</td></tr>
-        <tr><td>غرام 22</td><td id="g22">--</td></tr>
-        <tr><td>غرام 21</td><td id="g21">--</td></tr>
-        <tr><td>غرام 18</td><td id="g18">--</td></tr>
-    </table>
+<select id="currency">
+    <option value="USD">USD</option>
+    <option value="TRY">TRY</option>
+</select>
 
-    <div id="error" class="error"></div>
+<input type="number" id="manualPrice" placeholder="إدخال سعر الأونصة يدويًا">
 
-    <footer>© 2025 | 💻 ✨ 🟡 برمجة فؤاد أبو الحارث</footer>
+<button onclick="applyManual()">حفظ السعر اليدوي</button>
+<button onclick="loadGoldPrice()">🔄 تحديث</button>
+
+<table dir="rtl" class="grams">
+<tr><td>غرام 24</td><td id="g24">--</td></tr>
+<tr><td>غرام 22</td><td id="g22">--</td></tr>
+<tr><td>غرام 21</td><td id="g21">--</td></tr>
+<tr><td>غرام 18</td><td id="g18">--</td></tr>
+</table>
+
+<div class="error" id="error"></div>
+
+<footer>© 2025 | 💻 ✨ 🟡 برمجة فؤاد أبو الحارث</footer>
 </div>
 
 <script>
+const API_KEY = "goldapi-cvc4msmjinl6ew-io";
+
+function calculate(price, currency) {
+    const gram24 = price / 31.1035;
+    document.getElementById("ounce").innerText = price.toFixed(2) + " " + currency;
+    document.getElementById("g24").innerText = gram24.toFixed(2) + " " + currency;
+    document.getElementById("g22").innerText = (gram24 * 22 / 24).toFixed(2) + " " + currency;
+    document.getElementById("g21").innerText = (gram24 * 21 / 24).toFixed(2) + " " + currency;
+    document.getElementById("g18").innerText = (gram24 * 18 / 24).toFixed(2) + " " + currency;
+}
+
 async function loadGoldPrice() {
+    const currency = document.getElementById("currency").value;
+    document.getElementById("manualTag").innerText = "";
     try {
-        const response = await fetch(
-            "https://www.goldapi.io/api/XAU/USD?nocache=" + new Date().getTime(),
-            {
-                headers: {
-                    "x-access-token": "goldapi-cvc4msmjinl6ew-io",
-                    "Content-Type": "application/json"
-                }
-            }
+        const res = await fetch(
+            `https://www.goldapi.io/api/XAU/${currency}?t=${Date.now()}`,
+            { headers: { "x-access-token": API_KEY } }
         );
-
-        if (!response.ok) {
-            throw new Error("API Error");
-        }
-
-        const data = await response.json();
-        const ounce = data.price;
-        const gram24 = ounce / 31.1035;
-
-        document.getElementById("ounce").innerText =
-            ounce.toFixed(2) + " USD";
-
-        document.getElementById("g24").innerText =
-            gram24.toFixed(2) + " USD";
-
-        document.getElementById("g22").innerText =
-            (gram24 * 22 / 24).toFixed(2) + " USD";
-
-        document.getElementById("g21").innerText =
-            (gram24 * 21 / 24).toFixed(2) + " USD";
-
-        document.getElementById("g18").innerText =
-            (gram24 * 18 / 24).toFixed(2) + " USD";
-
-    } catch (err) {
+        if (!res.ok) throw "API Error";
+        const data = await res.json();
+        calculate(data.price, currency);
+        localStorage.removeItem("manualPrice");
+    } catch {
         document.getElementById("error").innerText =
-            "❌ تعذر جلب الأسعار حالياً";
-        console.error(err);
+            "❌ فشل الجلب التلقائي – استخدم الإدخال اليدوي";
     }
 }
 
-loadGoldPrice();
+function applyManual() {
+    const value = parseFloat(document.getElementById("manualPrice").value);
+    const currency = document.getElementById("currency").value;
+    if (!value) return;
+    calculate(value, currency);
+    localStorage.setItem("manualPrice", value);
+    localStorage.setItem("manualCurrency", currency);
+    document.getElementById("manualTag").innerText = "⚠ السعر مُدخل يدويًا";
+}
+
+(function init() {
+    const saved = localStorage.getItem("manualPrice");
+    const currency = localStorage.getItem("manualCurrency") || "USD";
+    document.getElementById("currency").value = currency;
+    if (saved) {
+        calculate(parseFloat(saved), currency);
+        document.getElementById("manualTag").innerText = "⚠ السعر مُدخل يدويًا";
+    } else {
+        loadGoldPrice();
+    }
+})();
 </script>
 
 </body>
