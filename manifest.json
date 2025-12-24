@@ -1,0 +1,16 @@
+{
+  "name": "سعر الذهب فؤاد",
+  "short_name": "الذهب",
+  "description": "تطبيق لمتابعة سعر الذهب لحظياً",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#34495E",
+  "theme_color": "#34495E",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/138/138292.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
