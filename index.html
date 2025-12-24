@@ -5,10 +5,6 @@
 <title>سعر الذهب</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
 <style>
 body {
     margin: 0;
@@ -17,21 +13,18 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
 }
 .box {
     width: 95%;
-    max-width: 380px;
+    max-width: 400px;
     background: white;
     border-radius: 18px;
     padding: 20px;
     text-align: center;
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
-img {
-    width: 90px;
-    margin-bottom: 10px;
-}
+img { width: 90px; }
 .price {
     font-size: 24px;
     font-weight: bold;
@@ -40,14 +33,13 @@ img {
 .manual {
     color: #e67e22;
     font-size: 13px;
-    margin-top: 4px;
 }
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
 }
-.grams td {
+td {
     padding: 6px;
     text-align: right;
 }
@@ -57,7 +49,6 @@ input, select, button {
     margin-top: 6px;
     border-radius: 8px;
     border: 1px solid #ccc;
-    font-size: 14px;
 }
 button {
     background: #d4af37;
@@ -65,18 +56,23 @@ button {
     font-weight: bold;
     cursor: pointer;
 }
-button:hover {
-    background: #b8962e;
-}
-.error {
-    color: red;
-    margin-top: 8px;
-}
+button:hover { background: #b8962e; }
+.error { color: red; }
 footer {
     margin-top: 12px;
     font-size: 12px;
     color: #888;
     direction: rtl;
+}
+canvas {
+    margin-top: 10px;
+    background: #fafafa;
+    border-radius: 10px;
+}
+.history {
+    font-size: 13px;
+    text-align: right;
+    margin-top: 10px;
 }
 </style>
 </head>
@@ -92,20 +88,35 @@ footer {
 
 <select id="currency">
     <option value="USD">USD</option>
-    <option value="TRY">TRY</option>
 </select>
 
 <input type="number" id="manualPrice" placeholder="إدخال سعر الأونصة يدويًا">
-
 <button onclick="applyManual()">حفظ السعر اليدوي</button>
 <button onclick="loadGoldPrice()">🔄 تحديث</button>
 
-<table dir="rtl" class="grams">
+<table dir="rtl">
 <tr><td>غرام 24</td><td id="g24">--</td></tr>
 <tr><td>غرام 22</td><td id="g22">--</td></tr>
 <tr><td>غرام 21</td><td id="g21">--</td></tr>
 <tr><td>غرام 18</td><td id="g18">--</td></tr>
 </table>
+
+<hr>
+
+<h4>🔁 محول شامل</h4>
+<select id="convertType">
+    <option value="moneyToGold">💰 من المال إلى ذهب</option>
+    <option value="goldToMoney">🟡 من الذهب إلى مال</option>
+</select>
+
+<input type="number" id="convertValue" placeholder="أدخل المبلغ أو الغرام">
+<button onclick="convertAll()">تحويل لكل العيارات</button>
+
+<div id="convertResult"></div>
+
+<canvas id="chart" width="330" height="150"></canvas>
+
+<div class="history" id="history"></div>
 
 <div class="error" id="error"></div>
 
@@ -114,55 +125,100 @@ footer {
 
 <script>
 const API_KEY = "goldapi-cvc4msmjinl6ew-io";
+let lastPrices = {};
 
 function calculate(price, currency) {
     const gram24 = price / 31.1035;
+    lastPrices = {
+        24: gram24,
+        22: gram24 * 22 / 24,
+        21: gram24 * 21 / 24,
+        18: gram24 * 18 / 24
+    };
     document.getElementById("ounce").innerText = price.toFixed(2) + " " + currency;
-    document.getElementById("g24").innerText = gram24.toFixed(2) + " " + currency;
-    document.getElementById("g22").innerText = (gram24 * 22 / 24).toFixed(2) + " " + currency;
-    document.getElementById("g21").innerText = (gram24 * 21 / 24).toFixed(2) + " " + currency;
-    document.getElementById("g18").innerText = (gram24 * 18 / 24).toFixed(2) + " " + currency;
+    document.getElementById("g24").innerText = lastPrices[24].toFixed(2);
+    document.getElementById("g22").innerText = lastPrices[22].toFixed(2);
+    document.getElementById("g21").innerText = lastPrices[21].toFixed(2);
+    document.getElementById("g18").innerText = lastPrices[18].toFixed(2);
 }
 
 async function loadGoldPrice() {
-    const currency = document.getElementById("currency").value;
-    document.getElementById("manualTag").innerText = "";
     try {
-        const res = await fetch(
-            `https://www.goldapi.io/api/XAU/${currency}?t=${Date.now()}`,
-            { headers: { "x-access-token": API_KEY } }
-        );
-        if (!res.ok) throw "API Error";
+        const res = await fetch("https://www.goldapi.io/api/XAU/USD", {
+            headers: { "x-access-token": API_KEY }
+        });
         const data = await res.json();
-        calculate(data.price, currency);
-        localStorage.removeItem("manualPrice");
+        calculate(data.price, "USD");
+        document.getElementById("manualTag").innerText = "";
     } catch {
         document.getElementById("error").innerText =
-            "❌ فشل الجلب التلقائي – استخدم الإدخال اليدوي";
+            "❌ فشل الجلب – استخدم الإدخال اليدوي";
     }
 }
 
 function applyManual() {
-    const value = parseFloat(document.getElementById("manualPrice").value);
-    const currency = document.getElementById("currency").value;
-    if (!value) return;
-    calculate(value, currency);
-    localStorage.setItem("manualPrice", value);
-    localStorage.setItem("manualCurrency", currency);
+    const v = parseFloat(document.getElementById("manualPrice").value);
+    if (!v) return;
+    calculate(v, "USD");
     document.getElementById("manualTag").innerText = "⚠ السعر مُدخل يدويًا";
 }
 
-(function init() {
-    const saved = localStorage.getItem("manualPrice");
-    const currency = localStorage.getItem("manualCurrency") || "USD";
-    document.getElementById("currency").value = currency;
-    if (saved) {
-        calculate(parseFloat(saved), currency);
-        document.getElementById("manualTag").innerText = "⚠ السعر مُدخل يدويًا";
-    } else {
-        loadGoldPrice();
+function convertAll() {
+    const val = parseFloat(document.getElementById("convertValue").value);
+    if (!val) return;
+
+    const type = document.getElementById("convertType").value;
+    let result = "";
+    let values = [];
+
+    for (let k in lastPrices) {
+        let r = type === "moneyToGold"
+            ? (val / lastPrices[k]).toFixed(2) + " غ"
+            : (val * lastPrices[k]).toFixed(2) + " USD";
+
+        result += `عيار ${k}: ${r}<br>`;
+        values.push(type === "moneyToGold"
+            ? val / lastPrices[k]
+            : val * lastPrices[k]);
     }
-})();
+
+    document.getElementById("convertResult").innerHTML = result;
+    drawChart(values);
+    saveHistory(result);
+}
+
+function drawChart(vals) {
+    const c = document.getElementById("chart");
+    const ctx = c.getContext("2d");
+    ctx.clearRect(0,0,c.width,c.height);
+
+    const max = Math.max(...vals);
+    const barWidth = 60;
+    vals.forEach((v,i)=>{
+        const h = (v/max)*100;
+        ctx.fillStyle="#d4af37";
+        ctx.fillRect(20+i*80,120-h,barWidth,h);
+        ctx.fillStyle="#000";
+        ctx.fillText([24,22,21,18][i],35+i*80,140);
+    });
+}
+
+function saveHistory(text) {
+    let h = JSON.parse(localStorage.getItem("history")||"[]");
+    h.unshift(text);
+    h = h.slice(0,5);
+    localStorage.setItem("history",JSON.stringify(h));
+    showHistory();
+}
+
+function showHistory() {
+    const h = JSON.parse(localStorage.getItem("history")||"[]");
+    document.getElementById("history").innerHTML =
+        "<b>🕒 آخر العمليات:</b><br>" + h.join("<hr>");
+}
+
+showHistory();
+loadGoldPrice();
 </script>
 
 </body>
