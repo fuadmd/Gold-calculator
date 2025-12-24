@@ -1,149 +1,170 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>سعر الذهب اللحظي - فؤاد أبو الحارث</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        /* تغيير الخلفية للون المطلوب */
-        background: #34495E; 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-    }
-    .box {
-        width: 95%;
-        max-width: 400px;
-        background: white;
-        border-radius: 18px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    img { width: 90px; }
-    h3 { color: #2c3e50; margin-bottom: 5px; }
-    .price {
-        font-size: 26px;
-        font-weight: bold;
-        color: #d4af37;
-        margin: 10px 0;
-    }
-    .status-tag {
-        font-size: 13px;
-        margin-bottom: 10px;
-        font-weight: bold;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-    td {
-        padding: 10px;
-        text-align: right;
-        border-bottom: 1px solid #eee;
-        color: #333;
-    }
-    input, select, button {
-        width: 100%;
-        padding: 10px;
-        margin-top: 8px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        box-sizing: border-box;
-    }
-    button {
-        background: #d4af37;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        border: none;
-        transition: 0.3s;
-    }
-    button:hover { background: #b8962e; }
-    .btn-update { background: #2c3e50; }
-    .btn-update:hover { background: #1a252f; }
+    <meta charset="UTF-8">
+    <title>تطبيق سعر الذهب - فؤاد أبو الحارث</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    .error { color: #e74c3c; margin-top: 10px; font-size: 13px; }
-    footer {
-        margin-top: 15px;
-        font-size: 11px;
-        color: #7f8c8d;
-        direction: rtl;
-    }
-    canvas {
-        margin-top: 15px;
-        background: #fdfdfd;
-        border-radius: 10px;
-        border: 1px solid #eee;
-    }
-    .history {
-        font-size: 12px;
-        text-align: right;
-        margin-top: 15px;
-        background: #f9f9f9;
-        padding: 10px;
-        border-radius: 8px;
-    }
-    #convertResult {
-        margin-top: 10px;
-        text-align: right;
-        font-size: 14px;
-        color: #2c3e50;
-        line-height: 1.6;
-    }
-</style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#34495E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/138/138292.png">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #34495E; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .box {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        img { width: 80px; margin-bottom: 10px; }
+        h3 { color: #2c3e50; margin: 5px 0; }
+        .price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #d4af37;
+            margin: 15px 0;
+        }
+        .status-tag {
+            font-size: 12px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            font-weight: 500;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            background: #d4af37;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: 0.3s ease;
+        }
+        button:hover { background: #b8962e; }
+        .btn-update { background: #2c3e50; margin-top: 5px; }
+        .btn-update:hover { background: #1a252f; }
+        
+        .error { color: #e74c3c; margin-top: 10px; font-size: 13px; }
+        footer {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #95a5a6;
+            direction: rtl;
+        }
+        canvas {
+            margin-top: 20px;
+            background: #fdfdfd;
+            border-radius: 12px;
+            border: 1px solid #eee;
+        }
+        .history {
+            font-size: 12px;
+            text-align: right;
+            margin-top: 15px;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            border-right: 4px solid #d4af37;
+        }
+        #convertResult {
+            margin-top: 15px;
+            text-align: right;
+            font-size: 14px;
+            color: #2c3e50;
+            line-height: 1.8;
+            background: #fff9e6;
+            padding: 10px;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="box">
-    <img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" alt="Gold">
+    <img src="https://cdn-icons-png.flaticon.com/512/138/138292.png" alt="Gold Logo">
 
-    <h3>سعر أونصة الذهب مباشر</h3>
-    <div class="price" id="ounce">جاري الجلب...</div>
+    <h3>سعر أونصة الذهب</h3>
+    <div class="price" id="ounce">جاري التحميل...</div>
     <div class="status-tag" id="statusTag"></div>
 
-    <input type="number" id="manualPrice" placeholder="إدخال سعر الأونصة يدويًا">
-    <button onclick="applyManual()">حفظ السعر اليدوي</button>
-    <button class="btn-update" onclick="loadGoldPrice()">🔄 تحديث السعر الآن</button>
+    <input type="number" id="manualPrice" placeholder="أدخل سعر الأونصة يدوياً">
+    <button onclick="applyManual()">💾 حفظ السعر اليدوي</button>
+    <button class="btn-update" onclick="loadGoldPrice()">🔄 تحديث تلقائي الآن</button>
 
     <table dir="rtl">
-        <tr><td>غرام 24</td><td id="g24">--</td></tr>
-        <tr><td>غرام 22</td><td id="g22">--</td></tr>
-        <tr><td>غرام 21</td><td id="g21">--</td></tr>
-        <tr><td>غرام 18</td><td id="g18">--</td></tr>
+        <tr><td>غرام عيار 24</td><td id="g24">--</td></tr>
+        <tr><td>غرام عيار 22</td><td id="g22">--</td></tr>
+        <tr><td>غرام عيار 21</td><td id="g21">--</td></tr>
+        <tr><td>غرام عيار 18</td><td id="g18">--</td></tr>
     </table>
 
-    <hr style="opacity: 0.3; margin: 20px 0;">
+    <hr style="opacity: 0.2; margin: 25px 0;">
 
-    <h4>🔁 محول الأوزان</h4>
+    <h4>🔁 محول الأوزان والمال</h4>
     <select id="convertType">
-        <option value="moneyToGold">💰 من دولار إلى ذهب</option>
-        <option value="goldToMoney">🟡 من ذهب إلى دولار</option>
+        <option value="moneyToGold">💰 تحويل من دولار إلى ذهب</option>
+        <option value="goldToMoney">🟡 تحويل من ذهب إلى دولار</option>
     </select>
 
-    <input type="number" id="convertValue" placeholder="أدخل الكمية">
-    <button onclick="convertAll()">تحويل النتائج</button>
+    <input type="number" id="convertValue" placeholder="أدخل القيمة هنا">
+    <button onclick="convertAll()">إظهار نتائج التحويل</button>
 
-    <div id="convertResult"></div>
+    <div id="convertResult" style="display:none;"></div>
 
     <canvas id="chart" width="330" height="150"></canvas>
 
     <div class="history" id="history"></div>
     <div class="error" id="error"></div>
 
-    <footer>© 2025 | 💻  برمجة فؤاد أبو الحارث</footer>
+    <footer>© 2025 | 💻 برمجة فؤاد أبو الحارث</footer>
 </div>
 
 <script>
+// تسجيل الـ Service Worker ليعمل كـ PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+            console.log('PWA Service Worker Registered');
+        }).catch(err => console.log('SW Registration Failed', err));
+    });
+}
+
 let lastPrices = {};
 
+// دالة الحساب
 function calculate(price, currency) {
     const gram24 = price / 31.1034768;
     lastPrices = {
@@ -160,6 +181,7 @@ function calculate(price, currency) {
     document.getElementById("g18").innerText = lastPrices[18].toFixed(2) + " $";
 }
 
+// جلب السعر من Binance (غير محدود ومجاني)
 async function loadGoldPrice() {
     try {
         const response = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT");
@@ -169,12 +191,12 @@ async function loadGoldPrice() {
         if (goldPrice) {
             calculate(goldPrice, "USD");
             const tag = document.getElementById("statusTag");
-            tag.innerText = "● تحديث مباشر من السوق";
+            tag.innerText = "● تحديث مباشر من السوق العالمي";
             tag.style.color = "#27ae60";
             document.getElementById("error").innerText = "";
         }
     } catch (err) {
-        document.getElementById("error").innerText = "❌ فشل الاتصال التلقائي";
+        document.getElementById("error").innerText = "❌ خطأ في الشبكة - استخدم اليدوي";
     }
 }
 
@@ -192,6 +214,8 @@ function convertAll() {
     if (!val || !lastPrices[24]) return;
 
     const type = document.getElementById("convertType").value;
+    const resDiv = document.getElementById("convertResult");
+    resDiv.style.display = "block";
     let result = "";
     let values = [];
 
@@ -204,9 +228,9 @@ function convertAll() {
         values.push(type === "moneyToGold" ? val / lastPrices[k] : val * lastPrices[k]);
     }
 
-    document.getElementById("convertResult").innerHTML = result;
+    resDiv.innerHTML = result;
     drawChart(values);
-    saveHistory(type === "moneyToGold" ? val + "$ تحويل" : val + " غرام تحويل");
+    saveHistory(type === "moneyToGold" ? val + "$ إلى ذهب" : val + " غرام إلى $");
 }
 
 function drawChart(vals) {
@@ -214,15 +238,32 @@ function drawChart(vals) {
     const ctx = c.getContext("2d");
     ctx.clearRect(0,0,c.width,c.height);
     const max = Math.max(...vals);
-    const barWidth = 45;
+    const barWidth = 40;
     vals.forEach((v,i)=>{
         const h = (v/max)*100;
         ctx.fillStyle="#d4af37";
-        ctx.fillRect(45+i*70, 120-h, barWidth, h);
+        ctx.roundRect(50+i*70, 120-h, barWidth, h, 5);
+        ctx.fill();
         ctx.fillStyle="#7f8c8d";
-        ctx.font = "bold 12px Arial";
-        ctx.fillText(["ع24","ع22","ع21","ع18"][i], 55+i*70, 140);
+        ctx.font = "bold 11px Arial";
+        ctx.fillText(["ع24","ع22","ع21","ع18"][i], 58+i*70, 140);
     });
+}
+
+// استخدام polyfill لـ roundRect في حال المتصفحات القديمة
+if (!Path2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+        if (w < 2 * r) r = w / 2;
+        if (h < 2 * r) r = h / 2;
+        this.beginPath();
+        this.moveTo(x + r, y);
+        this.arcTo(x + w, y, x + w, y + h, r);
+        this.arcTo(x + w, y + h, x, y + h, r);
+        this.arcTo(x, y + h, x, y, r);
+        this.arcTo(x, y, x + w, y, r);
+        this.closePath();
+        return this;
+    };
 }
 
 function saveHistory(text) {
@@ -236,7 +277,7 @@ function saveHistory(text) {
 
 function showHistory() {
     const h = JSON.parse(localStorage.getItem("history")||"[]");
-    document.getElementById("history").innerHTML = h.length > 0 ? "<b>🕒 السجل:</b><br>" + h.join("<hr style='margin:5px 0; opacity:0.1'>") : "";
+    document.getElementById("history").innerHTML = h.length > 0 ? "<b>🕒 السجل الأخير:</b><br>" + h.join("<hr style='margin:5px 0; opacity:0.05'>") : "";
 }
 
 showHistory();
