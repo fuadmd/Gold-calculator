@@ -1,7 +1,6 @@
 {
-  "name": "سعر الذهب فؤاد",
-  "short_name": "الذهب",
-  "description": "تطبيق لمتابعة سعر الذهب لحظياً",
+  "name": "تطبيق سعر الذهب",
+  "short_name": "سعر الذهب",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#34495E",
