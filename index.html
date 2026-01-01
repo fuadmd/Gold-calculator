@@ -10,9 +10,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/138/138292.png">
-    
-    <!-- إضافة مكتبة Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body {
@@ -25,22 +22,21 @@
             min-height: 100vh;
         }
         .box {
-            width: 95%;
-            max-width: 450px;
+            width: 90%;
+            max-width: 400px;
             background: white;
             border-radius: 20px;
             padding: 25px;
             text-align: center;
             box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            margin: 20px 0;
         }
-        img { width: 60px; margin-bottom: 10px; }
+        img { width: 80px; margin-bottom: 10px; }
         h3 { color: #2c3e50; margin: 5px 0; }
         .price {
             font-size: 28px;
             font-weight: bold;
             color: #d4af37;
-            margin: 10px 0;
+            margin: 15px 0;
         }
         .status-tag {
             font-size: 12px;
@@ -53,7 +49,7 @@
             margin-top: 10px;
         }
         td {
-            padding: 10px;
+            padding: 12px;
             text-align: right;
             border-bottom: 1px solid #eee;
             color: #333;
@@ -87,35 +83,12 @@
             color: #95a5a6;
             direction: rtl;
         }
-        
-        /* تنسيق قسم الشارت الجديد */
-        .chart-container {
-            margin-top: 25px;
+        canvas {
+            margin-top: 20px;
             background: #fdfdfd;
             border-radius: 12px;
             border: 1px solid #eee;
-            padding: 10px;
-            position: relative;
         }
-        .chart-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-        .chart-tabs button {
-            width: auto;
-            padding: 5px 15px;
-            font-size: 12px;
-            margin-top: 0;
-            background: #ecf0f1;
-            color: #7f8c8d;
-        }
-        .chart-tabs button.active {
-            background: #d4af37;
-            color: white;
-        }
-
         .history {
             font-size: 12px;
             text-align: right;
@@ -171,15 +144,7 @@
 
     <div id="convertResult" style="display:none;"></div>
 
-    <!-- قسم الشارت المطور -->
-    <div class="chart-container">
-        <div class="chart-tabs">
-            <button id="btn-1d" onclick="updateChartPeriod('1d')" class="active">يوم</button>
-            <button id="btn-1w" onclick="updateChartPeriod('1w')">أسبوع</button>
-            <button id="btn-1m" onclick="updateChartPeriod('1m')">شهر</button>
-        </div>
-        <canvas id="goldChart"></canvas>
-    </div>
+    <canvas id="chart" width="330" height="150"></canvas>
 
     <div class="history" id="history"></div>
     <div class="error" id="error"></div>
@@ -188,7 +153,7 @@
 </div>
 
 <script>
-// تسجيل الـ Service Worker
+// تسجيل الـ Service Worker ليعمل كـ PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').then(reg => {
@@ -198,8 +163,6 @@ if ('serviceWorker' in navigator) {
 }
 
 let lastPrices = {};
-let myChart = null;
-let currentPeriod = '1d';
 
 // دالة الحساب
 function calculate(price, currency) {
@@ -218,7 +181,7 @@ function calculate(price, currency) {
     document.getElementById("g18").innerText = lastPrices[18].toFixed(2) + " $";
 }
 
-// جلب السعر المباشر
+// جلب السعر من Binance (غير محدود ومجاني)
 async function loadGoldPrice() {
     try {
         const response = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT");
@@ -231,97 +194,10 @@ async function loadGoldPrice() {
             tag.innerText = "● تحديث مباشر من السوق العالمي";
             tag.style.color = "#27ae60";
             document.getElementById("error").innerText = "";
-            // تحديث الشارت عند التحميل الأول
-            if (!myChart) fetchHistoricalData(currentPeriod);
         }
     } catch (err) {
         document.getElementById("error").innerText = "❌ خطأ في الشبكة - استخدم اليدوي";
     }
-}
-
-// جلب البيانات التاريخية للشارت
-async function fetchHistoricalData(period) {
-    let interval = '1h'; // ليوم واحد
-    let limit = 24;
-    
-    if (period === '1w') {
-        interval = '4h';
-        limit = 42; // 7 days * 6 (4h intervals)
-    } else if (period === '1m') {
-        interval = '1d';
-        limit = 30;
-    }
-
-    try {
-        const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=${interval}&limit=${limit}`);
-        const data = await response.json();
-        
-        const labels = data.map(d => {
-            const date = new Date(d[0]);
-            if (period === '1d') return date.getHours() + ":00";
-            return (date.getMonth() + 1) + "/" + date.getDate();
-        });
-        
-        const prices = data.map(d => parseFloat(d[4])); // سعر الإغلاق
-        
-        renderChart(labels, prices);
-    } catch (err) {
-        console.error("Error fetching historical data", err);
-    }
-}
-
-function renderChart(labels, data) {
-    const ctx = document.getElementById('goldChart').getContext('2d');
-    
-    if (myChart) {
-        myChart.destroy();
-    }
-    
-    myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'سعر الأونصة ($)',
-                data: data,
-                borderColor: '#d4af37',
-                backgroundColor: 'rgba(212, 175, 55, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 0,
-                pointHoverRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                x: {
-                    display: true,
-                    grid: { display: false },
-                    ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6, font: { size: 10 } }
-                },
-                y: {
-                    display: true,
-                    position: 'right',
-                    ticks: { font: { size: 10 } }
-                }
-            }
-        }
-    });
-}
-
-function updateChartPeriod(period) {
-    currentPeriod = period;
-    // تحديث شكل الأزرار
-    document.querySelectorAll('.chart-tabs button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`btn-${period}`).classList.add('active');
-    
-    fetchHistoricalData(period);
 }
 
 function applyManual() {
@@ -341,6 +217,7 @@ function convertAll() {
     const resDiv = document.getElementById("convertResult");
     resDiv.style.display = "block";
     let result = "";
+    let values = [];
 
     for (let k in lastPrices) {
         let resVal = type === "moneyToGold" 
@@ -348,10 +225,45 @@ function convertAll() {
             : (val * lastPrices[k]).toFixed(2) + " $";
 
         result += `عيار ${k}: <b>${resVal}</b><br>`;
+        values.push(type === "moneyToGold" ? val / lastPrices[k] : val * lastPrices[k]);
     }
 
     resDiv.innerHTML = result;
+    drawChart(values);
     saveHistory(type === "moneyToGold" ? val + "$ إلى ذهب" : val + " غرام إلى $");
+}
+
+function drawChart(vals) {
+    const c = document.getElementById("chart");
+    const ctx = c.getContext("2d");
+    ctx.clearRect(0,0,c.width,c.height);
+    const max = Math.max(...vals);
+    const barWidth = 40;
+    vals.forEach((v,i)=>{
+        const h = (v/max)*100;
+        ctx.fillStyle="#d4af37";
+        ctx.roundRect(50+i*70, 120-h, barWidth, h, 5);
+        ctx.fill();
+        ctx.fillStyle="#7f8c8d";
+        ctx.font = "bold 11px Arial";
+        ctx.fillText(["ع24","ع22","ع21","ع18"][i], 58+i*70, 140);
+    });
+}
+
+// استخدام polyfill لـ roundRect في حال المتصفحات القديمة
+if (!Path2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+        if (w < 2 * r) r = w / 2;
+        if (h < 2 * r) r = h / 2;
+        this.beginPath();
+        this.moveTo(x + r, y);
+        this.arcTo(x + w, y, x + w, y + h, r);
+        this.arcTo(x + w, y + h, x, y + h, r);
+        this.arcTo(x, y + h, x, y, r);
+        this.arcTo(x, y, x + w, y, r);
+        this.closePath();
+        return this;
+    };
 }
 
 function saveHistory(text) {
