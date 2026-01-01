@@ -188,12 +188,35 @@
 </div>
 
 <script>
-// تسجيل الـ Service Worker
+// تسجيل الـ Service Worker مع آلية التحديث التلقائي
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').then(reg => {
             console.log('PWA Service Worker Registered');
+            
+            // التحقق من وجود تحديثات
+            reg.onupdatefound = () => {
+                const installingWorker = reg.installing;
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            console.log('New content is available; please refresh.');
+                            if(confirm('يوجد تحديث جديد للتطبيق، هل تريد التحديث الآن؟')) {
+                                window.location.reload();
+                            }
+                        }
+                    }
+                };
+            };
         }).catch(err => console.log('SW Registration Failed', err));
+    });
+
+    // إعادة تحميل الصفحة عند تفعيل الـ Service Worker الجديد
+    let refreshing;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        window.location.reload();
+        refreshing = true;
     });
 }
 
